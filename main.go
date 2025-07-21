@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	tasks      = make(map[string]*Task) // In-memory хранилище задач
+	tasks      = make(map[string]*Task)  // In-memory хранилище задач
 	taskMu     sync.Mutex                // Мьютекс для задач
-	active     = make(chan struct{}, 3)  // Семфор для лимита активных задач (3)
+	active     = make(chan struct{}, 3)  // Семафор для лимита активных задач (3)
 )
 
 func main() {
@@ -38,11 +38,12 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	id := fmt.Sprintf("task_%d", time.Now().UnixNano())
 	tasks[id] = &Task{ID: id, Status: "pending", Links: []string{}}
 
-	//select {
-	//case active <- struct{}{}:
-	//default:
-		// Не должно произойти из-за проверки выше
-	//}
+	// добавляем новую задачу
+	select {
+	case active <- struct{}{}:
+	default:
+		//Не должно произойти из-за проверки выше
+	}
 
 	json.NewEncoder(w).Encode(map[string]string{"id": id})
 }

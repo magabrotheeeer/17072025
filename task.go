@@ -30,8 +30,12 @@ func validateExtension(link string) bool {
 	return false
 }
 
+// создает zip-файл со ссылками пользователя
+// t - содержит информацию о текущем пользователе
 func processTask(t *Task) {
-	defer func() { <-active }() // Освободить слот
+
+	// очищаем место для след задачи
+	defer func() { <-active }()
 
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
